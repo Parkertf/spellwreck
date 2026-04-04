@@ -79,6 +79,11 @@
     font-size: 0.8rem; color: #888; text-transform: uppercase;
     letter-spacing: 0.1em; margin-bottom: 0.75rem;
   }
+  .option-group-subtitle {
+    font-size: 0.7rem; color: #666; text-transform: uppercase;
+    letter-spacing: 0.08em; margin: 0.75rem 0 0.5rem; border-top: 1px solid #2a2a4a;
+    padding-top: 0.75rem;
+  }
   .option-group-row {
     display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
   }
@@ -437,6 +442,14 @@
         <label><input type="checkbox" id="diff-medium" checked> Medium</label>
         <label><input type="checkbox" id="diff-hard" checked> Hard</label>
       </div>
+      <div class="option-group-subtitle">TV &amp; Movies</div>
+      <div class="option-group-row">
+        <label><input type="checkbox" id="set-office"> The Office</label>
+        <label><input type="checkbox" id="set-hp"> Harry Potter</label>
+        <label><input type="checkbox" id="set-friends"> Friends</label>
+        <label><input type="checkbox" id="set-reba"> Reba</label>
+        <label><input type="checkbox" id="set-pokemon"> Pok&eacute;mon</label>
+      </div>
     </div>
     <div class="option-group">
       <div class="option-group-title">Timer</div>
@@ -609,7 +622,75 @@ const WORD_BANK = [
   {w:"thoroughfare",d:"hard"},{w:"unequivocally",d:"hard"},{w:"verisimilitude",d:"hard"},
   {w:"acquittal",d:"hard"},{w:"belligerent",d:"hard"},{w:"chrysanthemum",d:"hard"},
   {w:"occasionally",d:"hard"},{w:"reminiscent",d:"hard"},
-  {w:"entrepreneur",d:"hard"},{w:"lieutenant",d:"hard"}
+  {w:"entrepreneur",d:"hard"},{w:"lieutenant",d:"hard"},
+  // The Office
+  {w:"Schrute",d:"office"},{w:"Halpert",d:"office"},{w:"Beesly",d:"office"},
+  {w:"Filippelli",d:"office"},{w:"Flenderson",d:"office"},{w:"Kapoor",d:"office"},
+  {w:"Bratton",d:"office"},{w:"Levinson",d:"office"},{w:"Mifflin",d:"office"},
+  {w:"Scranton",d:"office"},{w:"Lackawanna",d:"office"},{w:"Sabre",d:"office"},
+  {w:"bankruptcy",d:"office"},{w:"superstitious",d:"office"},{w:"concierge",d:"office"},
+  {w:"asbestos",d:"office"},{w:"rabies",d:"office"},{w:"surveillance",d:"office"},
+  {w:"warehouse",d:"office"},{w:"Phyllis",d:"office"},{w:"pretzel",d:"office"},
+  {w:"Benihana",d:"office"},{w:"Hawaiian",d:"office"},{w:"cappuccino",d:"office"},
+  {w:"Mediterranean",d:"office"},{w:"Dunder",d:"office"},{w:"assistant",d:"office"},
+  {w:"regional",d:"office"},{w:"conference",d:"office"},{w:"Dundies",d:"office"},
+  {w:"Recyclops",d:"office"},{w:"annihilation",d:"office"},{w:"deposition",d:"office"},
+  {w:"negotiation",d:"office"},{w:"confidentiality",d:"office"},
+  // Harry Potter
+  {w:"Dumbledore",d:"hp"},{w:"Hermione",d:"hp"},{w:"Sirius",d:"hp"},
+  {w:"Voldemort",d:"hp"},{w:"Gryffindor",d:"hp"},{w:"Slytherin",d:"hp"},
+  {w:"Ravenclaw",d:"hp"},{w:"Hufflepuff",d:"hp"},{w:"Quidditch",d:"hp"},
+  {w:"Hogwarts",d:"hp"},{w:"Hagrid",d:"hp"},{w:"Snape",d:"hp"},
+  {w:"Draco",d:"hp"},{w:"Malfoy",d:"hp"},{w:"McGonagall",d:"hp"},
+  {w:"Neville",d:"hp"},{w:"Longbottom",d:"hp"},{w:"Bellatrix",d:"hp"},
+  {w:"Lestrange",d:"hp"},{w:"Horcrux",d:"hp"},{w:"Patronus",d:"hp"},
+  {w:"Azkaban",d:"hp"},{w:"Diagon",d:"hp"},{w:"Quaffle",d:"hp"},
+  {w:"Basilisk",d:"hp"},{w:"Hippogriff",d:"hp"},{w:"Pensieve",d:"hp"},
+  {w:"Polyjuice",d:"hp"},{w:"Animagus",d:"hp"},{w:"Leviosa",d:"hp"},
+  {w:"Expelliarmus",d:"hp"},{w:"Avada Kedavra",d:"hp"},{w:"Wingardium",d:"hp"},
+  {w:"Accio",d:"hp"},{w:"Lumos",d:"hp"},{w:"Nymphadora",d:"hp"},
+  {w:"Tonks",d:"hp"},{w:"Dobby",d:"hp"},{w:"Kreacher",d:"hp"},
+  {w:"Thestrals",d:"hp"},{w:"Beauxbatons",d:"hp"},{w:"Durmstrang",d:"hp"},
+  {w:"Triwizard",d:"hp"},{w:"Muggle",d:"hp"},{w:"Squib",d:"hp"},
+  // Friends
+  {w:"Geller",d:"friends"},{w:"Bing",d:"friends"},{w:"Buffay",d:"friends"},
+  {w:"Tribbiani",d:"friends"},{w:"Ursula",d:"friends"},{w:"Janice",d:"friends"},
+  {w:"Gunther",d:"friends"},{w:"Phoebe",d:"friends"},{w:"Chandler",d:"friends"},
+  {w:"paleontologist",d:"friends"},{w:"masseuse",d:"friends"},{w:"unagi",d:"friends"},
+  {w:"Barbados",d:"friends"},{w:"chafing",d:"friends"},{w:"Mississippi",d:"friends"},
+  {w:"moist",d:"friends"},{w:"commissary",d:"friends"},{w:"boutique",d:"friends"},
+  {w:"restaurant",d:"friends"},{w:"cappuccino",d:"friends"},{w:"lasagna",d:"friends"},
+  {w:"Thanksgiving",d:"friends"},{w:"divorce",d:"friends"},{w:"annulment",d:"friends"},
+  {w:"transponster",d:"friends"},{w:"rhinoceros",d:"friends"},{w:"anonymous",d:"friends"},
+  {w:"surveillance",d:"friends"},{w:"apartment",d:"friends"},{w:"barista",d:"friends"},
+  // Reba
+  {w:"McEntire",d:"reba"},{w:"Brock",d:"reba"},{w:"Barbra Jean",d:"reba"},
+  {w:"Kyra",d:"reba"},{w:"Cheyenne",d:"reba"},{w:"Van",d:"reba"},
+  {w:"Montgomery",d:"reba"},{w:"Houston",d:"reba"},{w:"hysterical",d:"reba"},
+  {w:"orthodontist",d:"reba"},{w:"realtor",d:"reba"},{w:"rehabilitation",d:"reba"},
+  {w:"custody",d:"reba"},{w:"alimony",d:"reba"},{w:"pregnancy",d:"reba"},
+  {w:"reconciliation",d:"reba"},{w:"infidelity",d:"reba"},{w:"dysfunctional",d:"reba"},
+  {w:"grandchildren",d:"reba"},{w:"Tennessee",d:"reba"},{w:"country",d:"reba"},
+  {w:"rodeo",d:"reba"},{w:"pageant",d:"reba"},{w:"ridiculous",d:"reba"},
+  // Pok\u00e9mon (Original 151 + series)
+  {w:"Pikachu",d:"pokemon"},{w:"Charizard",d:"pokemon"},{w:"Bulbasaur",d:"pokemon"},
+  {w:"Squirtle",d:"pokemon"},{w:"Charmander",d:"pokemon"},{w:"Venusaur",d:"pokemon"},
+  {w:"Blastoise",d:"pokemon"},{w:"Caterpie",d:"pokemon"},{w:"Butterfree",d:"pokemon"},
+  {w:"Pidgeotto",d:"pokemon"},{w:"Rattata",d:"pokemon"},{w:"Raichu",d:"pokemon"},
+  {w:"Sandshrew",d:"pokemon"},{w:"Nidoqueen",d:"pokemon"},{w:"Ninetales",d:"pokemon"},
+  {w:"Jigglypuff",d:"pokemon"},{w:"Vileplume",d:"pokemon"},{w:"Parasect",d:"pokemon"},
+  {w:"Psyduck",d:"pokemon"},{w:"Arcanine",d:"pokemon"},{w:"Poliwrath",d:"pokemon"},
+  {w:"Machamp",d:"pokemon"},{w:"Alakazam",d:"pokemon"},{w:"Tentacruel",d:"pokemon"},
+  {w:"Geodude",d:"pokemon"},{w:"Rapidash",d:"pokemon"},{w:"Farfetch'd",d:"pokemon"},
+  {w:"Magnemite",d:"pokemon"},{w:"Dodrio",d:"pokemon"},{w:"Gengar",d:"pokemon"},
+  {w:"Onix",d:"pokemon"},{w:"Drowzee",d:"pokemon"},{w:"Exeggutor",d:"pokemon"},
+  {w:"Hitmonlee",d:"pokemon"},{w:"Hitmonchan",d:"pokemon"},{w:"Lickitung",d:"pokemon"},
+  {w:"Chansey",d:"pokemon"},{w:"Kangaskhan",d:"pokemon"},{w:"Seadra",d:"pokemon"},
+  {w:"Mr. Mime",d:"pokemon"},{w:"Scyther",d:"pokemon"},{w:"Jynx",d:"pokemon"},
+  {w:"Gyarados",d:"pokemon"},{w:"Lapras",d:"pokemon"},{w:"Eevee",d:"pokemon"},
+  {w:"Vaporeon",d:"pokemon"},{w:"Snorlax",d:"pokemon"},{w:"Articuno",d:"pokemon"},
+  {w:"Zapdos",d:"pokemon"},{w:"Moltres",d:"pokemon"},{w:"Dragonite",d:"pokemon"},
+  {w:"Mewtwo",d:"pokemon"},{w:"Mew",d:"pokemon"}
 ];
 
 // --- Sound Effects (Web Audio API) ---
@@ -884,12 +965,19 @@ function startGame() {
   if (document.getElementById("diff-easy").checked) selectedDifficulties.push("easy");
   if (document.getElementById("diff-medium").checked) selectedDifficulties.push("medium");
   if (document.getElementById("diff-hard").checked) selectedDifficulties.push("hard");
+  if (document.getElementById("set-office").checked) selectedDifficulties.push("office");
+  if (document.getElementById("set-hp").checked) selectedDifficulties.push("hp");
+  if (document.getElementById("set-friends").checked) selectedDifficulties.push("friends");
+  if (document.getElementById("set-reba").checked) selectedDifficulties.push("reba");
+  if (document.getElementById("set-pokemon").checked) selectedDifficulties.push("pokemon");
   timerSeconds = parseInt(document.getElementById("timer-select").value);
   autoTimer = document.getElementById("auto-timer-check").checked;
   endlessMode = document.getElementById("endless-check").checked;
   soundEnabled = document.getElementById("sound-check").checked;
   currentPlayerIndex = 0;
   gameActive = true;
+  seenWords = [];
+  saveSeen();
   missedWords = [];
   streaks = {};
   bestStreaks = {};
@@ -1157,6 +1245,8 @@ function endGame() {
 }
 
 function newGame() {
+  seenWords = [];
+  saveSeen();
   missedWords = [];
   streaks = {};
   bestStreaks = {};
