@@ -360,6 +360,9 @@
     <label style="cursor:pointer">
       <input type="checkbox" id="auto-timer-check" checked> Auto-start timer
     </label>
+    <label style="cursor:pointer">
+      <input type="checkbox" id="endless-check"> Endless mode
+    </label>
   </div>
 
   <button class="btn btn-primary" id="start-btn" disabled>Start Game</button>
@@ -568,6 +571,7 @@ let streaks = {};       // playerName -> current streak
 let bestStreaks = {};    // playerName -> best streak
 let missedWords = [];    // words answered wrong this game
 let gameActive = false;
+let endlessMode = false;
 
 // --- LocalStorage ---
 function loadState() {
@@ -647,8 +651,16 @@ function getAvailableWords() {
 }
 
 function pickWord() {
-  const available = getAvailableWords();
-  if (available.length === 0) return null;
+  var available = getAvailableWords();
+  if (available.length === 0) {
+    if (endlessMode) {
+      seenWords = [];
+      saveSeen();
+      available = getAvailableWords();
+    } else {
+      return null;
+    }
+  }
   return available[Math.floor(Math.random() * available.length)];
 }
 
@@ -727,6 +739,7 @@ function startGame() {
   difficulty = document.getElementById("difficulty-select").value;
   timerSeconds = parseInt(document.getElementById("timer-select").value);
   autoTimer = document.getElementById("auto-timer-check").checked;
+  endlessMode = document.getElementById("endless-check").checked;
   currentPlayerIndex = 0;
   gameActive = true;
   missedWords = [];
