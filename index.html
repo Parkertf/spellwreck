@@ -167,6 +167,7 @@
     max-width: 95vw;
     overflow: visible;
     transition: transform 0.15s, color 0.15s;
+    cursor: pointer;
   }
 
   .word-display.flash-correct {
@@ -292,6 +293,53 @@
     background: rgba(0,0,0,0.4);
   }
   .panel-overlay.visible { display: block; }
+
+  /* --- Fullscreen Word Mode --- */
+  .fullscreen-overlay {
+    display: none; position: fixed; inset: 0; z-index: 200;
+    background: #1a1a2e;
+    flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .fullscreen-overlay.active { display: flex; }
+
+  .fullscreen-overlay .fs-turn {
+    font-size: 1.8rem; color: #aaa; margin-bottom: 1rem;
+  }
+  .fullscreen-overlay .fs-turn strong { color: #f5c842; }
+
+  .fullscreen-overlay .fs-word {
+    font-size: clamp(5rem, 14vw, 13rem);
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.08em; text-align: center;
+    white-space: nowrap; max-width: 95vw;
+    padding: 1rem;
+    transition: transform 0.15s, color 0.15s;
+  }
+
+  .fullscreen-overlay .fs-word.flash-correct { animation: flashCorrect 0.4s ease-out; }
+  .fullscreen-overlay .fs-word.flash-wrong { animation: flashWrong 0.4s ease-out; }
+  .fullscreen-overlay .fs-word.flash-skip { animation: flashSkip 0.35s ease-out; }
+
+  .fullscreen-overlay .fs-timer-area {
+    display: flex; align-items: center; gap: 0.75rem;
+    width: 80%; max-width: 600px; margin-top: 2rem; min-height: 3rem;
+  }
+  .fullscreen-overlay .fs-timer-bar-container {
+    flex: 1; height: 8px; background: #333; border-radius: 4px;
+    overflow: hidden;
+  }
+  .fullscreen-overlay .fs-timer-bar {
+    height: 100%; background: #f5c842; border-radius: 4px;
+    transition: width 0.1s linear, background-color 0.3s;
+    width: 100%;
+  }
+  .fullscreen-overlay .fs-timer-bar.urgent { background: #e74c3c; }
+
+  .fullscreen-overlay .fs-hint {
+    position: fixed; bottom: 1.5rem;
+    font-size: 0.8rem; color: #444;
+  }
 
   /* --- Summary Screen --- */
   .summary-title {
@@ -588,6 +636,7 @@ let bestStreaks = {};    // playerName -> best streak
 let missedWords = [];    // words answered wrong this game
 let gameActive = false;
 let endlessMode = false;
+let fullscreenMode = false;
 
 // --- LocalStorage ---
 function loadState() {
@@ -698,6 +747,11 @@ function startTimer() {
   toggleBtn.style.display = "";
   toggleBtn.textContent = "\u25B6\uFE0F";
 
+  // Reset fullscreen timer bar
+  var fsBar = document.getElementById("fs-timer-bar");
+  fsBar.style.width = "100%";
+  fsBar.classList.remove("urgent");
+
   if (autoTimer) {
     runTimer();
   }
@@ -721,6 +775,7 @@ function runTimer() {
     var pct = (timerRemaining / timerSeconds) * 100;
     bar.style.width = pct + "%";
     if (timerRemaining <= 5) bar.classList.add("urgent");
+    syncFullscreenTimer();
   }, 100);
 }
 
@@ -799,9 +854,11 @@ function nextWord() {
   remainEl.textContent = remaining + " words remaining";
   remainEl.className = "words-remaining" + (remaining <= 10 ? " warning" : "");
 
-  document.getElementById("current-player-name").textContent = players[currentPlayerIndex].name;
+  var playerName = players[currentPlayerIndex].name;
+  document.getElementById("current-player-name").textContent = playerName;
   updateStreakDisplay();
   renderScoreboard();
+  syncFullscreen();
 }
 
 function fitWord(el) {
@@ -829,10 +886,11 @@ function updateStreakDisplay() {
 }
 
 function flashWord(type) {
-  const display = document.getElementById("word-display");
+  var display = document.getElementById("word-display");
   display.classList.remove("flash-correct", "flash-wrong", "flash-skip");
   void display.offsetWidth;
   display.classList.add("flash-" + type);
+  flashFullscreenWord(type);
 }
 
 function flashButton(btn) {
@@ -939,6 +997,7 @@ function closeScorePanel() {
 function endGame() {
   gameActive = false;
   stopTimer();
+  exitFullscreen();
 
   var sorted = [].concat(players).sort(function(a, b) { return b.score - a.score; });
   var totalWords = seenWords.length;
@@ -1037,8 +1096,62 @@ document.addEventListener("keydown", function(e) {
   } else if (e.key === "3" || e.key === "ArrowRight") {
     e.preventDefault();
     handleSkip();
+  } else if (e.key === " ") {
+    e.preventDefault();
+    toggleTimer();
+  } else if (e.key === "Escape") {
+    exitFullscreen();
   }
 });
+
+// --- Fullscreen Mode ---
+function enterFullscreen() {
+  fullscreenMode = true;
+  document.getElementById("fullscreen-overlay").classList.add("active");
+  syncFullscreen();
+}
+
+function exitFullscreen() {
+  fullscreenMode = false;
+  document.getElementById("fullscreen-overlay").classList.remove("active");
+}
+
+function syncFullscreen() {
+  if (!fullscreenMode) return;
+  var fsWord = document.getElementById("fs-word");
+  fsWord.textContent = currentWord || "No words left!";
+  fsWord.style.fontSize = "";
+  if (currentWord) {
+    var maxWidth = window.innerWidth * 0.95;
+    var size = parseFloat(getComputedStyle(fsWord).fontSize);
+    while (fsWord.scrollWidth > maxWidth && size > 20) {
+      size -= 4;
+      fsWord.style.fontSize = size + "px";
+    }
+  }
+  document.getElementById("fs-player-name").textContent = players[currentPlayerIndex].name;
+}
+
+function flashFullscreenWord(type) {
+  if (!fullscreenMode) return;
+  var fsWord = document.getElementById("fs-word");
+  fsWord.classList.remove("flash-correct", "flash-wrong", "flash-skip");
+  void fsWord.offsetWidth;
+  fsWord.classList.add("flash-" + type);
+}
+
+function syncFullscreenTimer() {
+  if (!fullscreenMode) return;
+  var fsBar = document.getElementById("fs-timer-bar");
+  if (timerSeconds === 0 || timerRemaining <= 0) {
+    fsBar.style.width = "0%";
+    return;
+  }
+  var pct = (timerRemaining / timerSeconds) * 100;
+  fsBar.style.width = pct + "%";
+  if (timerRemaining <= 5) fsBar.classList.add("urgent");
+  else fsBar.classList.remove("urgent");
+}
 
 // --- Event Listeners ---
 document.getElementById("add-player-btn").addEventListener("click", addPlayer);
@@ -1056,10 +1169,28 @@ document.getElementById("new-game-btn").addEventListener("click", function() { c
 document.getElementById("summary-new-game-btn").addEventListener("click", newGame);
 document.getElementById("summary-setup-btn").addEventListener("click", backToSetup);
 document.addEventListener("click", function(e) { if (!document.getElementById("gear-menu").contains(e.target)) closeGear(); });
+document.getElementById("word-display").addEventListener("click", enterFullscreen);
+document.getElementById("fullscreen-overlay").addEventListener("click", function(e) {
+  // Only exit if clicking the background, not the word itself
+  if (e.target === this || e.target.classList.contains("fs-hint")) exitFullscreen();
+});
 
 // --- Init ---
 loadState();
 renderPlayerList();
 </script>
+
+<!-- ===== Fullscreen Overlay ===== -->
+<div class="fullscreen-overlay" id="fullscreen-overlay">
+  <p class="fs-turn"><strong id="fs-player-name"></strong>'s turn</p>
+  <div class="fs-word" id="fs-word"></div>
+  <div class="fs-timer-area">
+    <div class="fs-timer-bar-container">
+      <div class="fs-timer-bar" id="fs-timer-bar"></div>
+    </div>
+  </div>
+  <p class="fs-hint">Click to exit &bull; Keyboard: 1/&larr; Correct &bull; 2/&darr; Wrong &bull; 3/&rarr; Skip &bull; Space pause</p>
+</div>
+
 </body>
 </html>
