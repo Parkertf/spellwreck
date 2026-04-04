@@ -64,15 +64,26 @@
   .player-input input::placeholder { color: #666; }
 
   .setup-options {
-    display: flex; gap: 1.5rem; margin: 1.5rem 0; width: 100%; max-width: 400px;
-    flex-wrap: wrap; justify-content: center;
+    display: flex; flex-direction: column; gap: 1rem;
+    margin: 1.5rem 0; width: 100%; max-width: 400px;
+  }
+  .option-group {
+    background: #16213e; border-radius: 10px; padding: 1rem 1.2rem;
+  }
+  .option-group-title {
+    font-size: 0.8rem; color: #888; text-transform: uppercase;
+    letter-spacing: 0.1em; margin-bottom: 0.75rem;
+  }
+  .option-group-row {
+    display: flex; gap: 1.25rem; align-items: center; flex-wrap: wrap;
   }
   .setup-options label {
     display: flex; align-items: center; gap: 0.4rem; font-size: 1rem; color: #aaa;
+    cursor: pointer;
   }
   .setup-options select {
     padding: 0.4rem 0.6rem; border-radius: 6px; border: 2px solid #333;
-    background: #16213e; color: #eee; font-size: 1rem; outline: none;
+    background: #0f1a2e; color: #eee; font-size: 1rem; outline: none;
   }
   .setup-options select:focus { border-color: #f5c842; }
 
@@ -340,26 +351,37 @@
   <p id="setup-empty" class="empty-state">Add at least 1 player to start</p>
 
   <div class="setup-options">
-    <label style="cursor:pointer"><input type="checkbox" id="diff-easy" checked> Easy</label>
-    <label style="cursor:pointer"><input type="checkbox" id="diff-medium" checked> Medium</label>
-    <label style="cursor:pointer"><input type="checkbox" id="diff-hard" checked> Hard</label>
-    <label>Timer:
-      <select id="timer-select">
-        <option value="0">Off</option>
-        <option value="10">10s</option>
-        <option value="15" selected>15s</option>
-        <option value="20">20s</option>
-        <option value="30">30s</option>
-        <option value="60">60s</option>
-        <option value="120">120s</option>
-      </select>
-    </label>
-    <label style="cursor:pointer">
-      <input type="checkbox" id="auto-timer-check" checked> Auto-start timer
-    </label>
-    <label style="cursor:pointer">
-      <input type="checkbox" id="endless-check"> Endless mode
-    </label>
+    <div class="option-group">
+      <div class="option-group-title">Difficulty</div>
+      <div class="option-group-row">
+        <label><input type="checkbox" id="diff-easy" checked> Easy</label>
+        <label><input type="checkbox" id="diff-medium" checked> Medium</label>
+        <label><input type="checkbox" id="diff-hard" checked> Hard</label>
+      </div>
+    </div>
+    <div class="option-group">
+      <div class="option-group-title">Timer</div>
+      <div class="option-group-row">
+        <label>
+          <select id="timer-select">
+            <option value="0">Off</option>
+            <option value="10">10s</option>
+            <option value="15" selected>15s</option>
+            <option value="20">20s</option>
+            <option value="30">30s</option>
+            <option value="60">60s</option>
+            <option value="120">120s</option>
+          </select>
+        </label>
+        <label><input type="checkbox" id="auto-timer-check" checked> Auto-start</label>
+      </div>
+    </div>
+    <div class="option-group">
+      <div class="option-group-title">Mode</div>
+      <div class="option-group-row">
+        <label><input type="checkbox" id="endless-check"> Endless</label>
+      </div>
+    </div>
   </div>
 
   <button class="btn btn-primary" id="start-btn" disabled>Start Game</button>
