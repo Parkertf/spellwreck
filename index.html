@@ -442,6 +442,10 @@
         <label><input type="checkbox" id="diff-medium" checked> Medium</label>
         <label><input type="checkbox" id="diff-hard" checked> Hard</label>
       </div>
+      <div class="option-group-subtitle">Other</div>
+      <div class="option-group-row">
+        <label><input type="checkbox" id="set-kids"> Kids</label>
+      </div>
       <div class="option-group-subtitle">TV &amp; Movies</div>
       <div class="option-group-row">
         <label><input type="checkbox" id="set-office"> The Office</label>
@@ -623,6 +627,34 @@ const WORD_BANK = [
   {w:"acquittal",d:"hard"},{w:"belligerent",d:"hard"},{w:"chrysanthemum",d:"hard"},
   {w:"occasionally",d:"hard"},{w:"reminiscent",d:"hard"},
   {w:"entrepreneur",d:"hard"},{w:"lieutenant",d:"hard"},
+  // Kids (up to Grade 2)
+  {w:"about",d:"kids"},{w:"after",d:"kids"},{w:"again",d:"kids"},{w:"along",d:"kids"},
+  {w:"always",d:"kids"},{w:"animal",d:"kids"},{w:"answer",d:"kids"},{w:"around",d:"kids"},
+  {w:"because",d:"kids"},{w:"before",d:"kids"},{w:"began",d:"kids"},{w:"behind",d:"kids"},
+  {w:"believe",d:"kids"},{w:"below",d:"kids"},{w:"between",d:"kids"},{w:"birthday",d:"kids"},
+  {w:"brother",d:"kids"},{w:"brought",d:"kids"},{w:"build",d:"kids"},{w:"caught",d:"kids"},
+  {w:"children",d:"kids"},{w:"climb",d:"kids"},{w:"close",d:"kids"},{w:"colour",d:"kids"},
+  {w:"could",d:"kids"},{w:"country",d:"kids"},{w:"cousin",d:"kids"},{w:"daughter",d:"kids"},
+  {w:"different",d:"kids"},{w:"does",d:"kids"},{w:"done",d:"kids"},{w:"early",d:"kids"},
+  {w:"earth",d:"kids"},{w:"eight",d:"kids"},{w:"enough",d:"kids"},{w:"every",d:"kids"},
+  {w:"family",d:"kids"},{w:"father",d:"kids"},{w:"favourite",d:"kids"},{w:"field",d:"kids"},
+  {w:"finally",d:"kids"},{w:"first",d:"kids"},{w:"floor",d:"kids"},{w:"follow",d:"kids"},
+  {w:"friend",d:"kids"},{w:"garden",d:"kids"},{w:"great",d:"kids"},{w:"group",d:"kids"},
+  {w:"guess",d:"kids"},{w:"half",d:"kids"},{w:"happy",d:"kids"},{w:"heard",d:"kids"},
+  {w:"heart",d:"kids"},{w:"island",d:"kids"},{w:"kitchen",d:"kids"},{w:"knife",d:"kids"},
+  {w:"laugh",d:"kids"},{w:"learn",d:"kids"},{w:"light",d:"kids"},{w:"listen",d:"kids"},
+  {w:"little",d:"kids"},{w:"money",d:"kids"},{w:"morning",d:"kids"},{w:"mother",d:"kids"},
+  {w:"mountain",d:"kids"},{w:"mouth",d:"kids"},{w:"never",d:"kids"},{w:"night",d:"kids"},
+  {w:"nothing",d:"kids"},{w:"ocean",d:"kids"},{w:"often",d:"kids"},{w:"once",d:"kids"},
+  {w:"only",d:"kids"},{w:"open",d:"kids"},{w:"other",d:"kids"},{w:"people",d:"kids"},
+  {w:"picture",d:"kids"},{w:"piece",d:"kids"},{w:"please",d:"kids"},{w:"pretty",d:"kids"},
+  {w:"question",d:"kids"},{w:"quiet",d:"kids"},{w:"really",d:"kids"},{w:"right",d:"kids"},
+  {w:"school",d:"kids"},{w:"should",d:"kids"},{w:"special",d:"kids"},{w:"straight",d:"kids"},
+  {w:"sugar",d:"kids"},{w:"their",d:"kids"},{w:"there",d:"kids"},{w:"thought",d:"kids"},
+  {w:"through",d:"kids"},{w:"together",d:"kids"},{w:"trouble",d:"kids"},{w:"turn",d:"kids"},
+  {w:"under",d:"kids"},{w:"water",d:"kids"},{w:"where",d:"kids"},{w:"which",d:"kids"},
+  {w:"whole",d:"kids"},{w:"world",d:"kids"},{w:"would",d:"kids"},{w:"write",d:"kids"},
+  {w:"wrong",d:"kids"},{w:"young",d:"kids"},
   // The Office
   {w:"Schrute",d:"office"},{w:"Halpert",d:"office"},{w:"Beesly",d:"office"},
   {w:"Filippelli",d:"office"},{w:"Flenderson",d:"office"},{w:"Kapoor",d:"office"},
@@ -862,11 +894,19 @@ function removePlayer(i) {
 
 // --- Word Selection ---
 function getFilteredWords() {
-  return WORD_BANK.filter(e => selectedDifficulties.indexOf(e.d) !== -1).map(e => e.w);
+  var seen = {};
+  return WORD_BANK.filter(e => selectedDifficulties.indexOf(e.d) !== -1).map(e => e.w).filter(function(w) {
+    var lower = w.toLowerCase();
+    if (seen[lower]) return false;
+    seen[lower] = true;
+    return true;
+  });
 }
 
 function getAvailableWords() {
-  return getFilteredWords().filter(w => !seenWords.includes(w));
+  return getFilteredWords().filter(function(w) {
+    return seenWords.indexOf(w) === -1;
+  });
 }
 
 function pickWord() {
@@ -965,6 +1005,7 @@ function startGame() {
   if (document.getElementById("diff-easy").checked) selectedDifficulties.push("easy");
   if (document.getElementById("diff-medium").checked) selectedDifficulties.push("medium");
   if (document.getElementById("diff-hard").checked) selectedDifficulties.push("hard");
+  if (document.getElementById("set-kids").checked) selectedDifficulties.push("kids");
   if (document.getElementById("set-office").checked) selectedDifficulties.push("office");
   if (document.getElementById("set-hp").checked) selectedDifficulties.push("hp");
   if (document.getElementById("set-friends").checked) selectedDifficulties.push("friends");
