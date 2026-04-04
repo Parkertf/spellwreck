@@ -175,10 +175,10 @@
     width: 100%;
     max-width: 95vw;
     overflow: visible;
-    transition: transform 0.15s, color 0.15s;
-    cursor: pointer;
+    transition: transform 0.15s, color 0.15s, filter 0.3s;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
+  .word-display.blurred { filter: blur(2.5rem); color: #f5c842; cursor: pointer; }
 
   .word-display.flash-correct {
     animation: flashCorrect 0.4s ease-out;
@@ -245,6 +245,16 @@
   .empty-state { color: #666; margin: 1rem 0; font-style: italic; }
 
   /* --- Gear Menu --- */
+  .fullscreen-btn {
+    position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom)); left: calc(1.5rem + env(safe-area-inset-left));
+    z-index: 100; background: none; border: none; color: #888;
+    font-size: 2rem; cursor: pointer; padding: 0.5rem;
+    min-width: 44px; min-height: 44px; line-height: 1;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    transition: color 0.15s;
+  }
+  .fullscreen-btn:hover { color: #f5c842; }
+
   .gear-menu {
     position: fixed; top: calc(1rem + env(safe-area-inset-top)); right: calc(1rem + env(safe-area-inset-right)); z-index: 100;
   }
@@ -334,6 +344,7 @@
   .fullscreen-overlay .fs-word.flash-correct { animation: flashCorrect 0.4s ease-out; }
   .fullscreen-overlay .fs-word.flash-wrong { animation: flashWrong 0.4s ease-out; }
   .fullscreen-overlay .fs-word.flash-skip { animation: flashSkip 0.35s ease-out; }
+  .fullscreen-overlay .fs-word.blurred { filter: blur(2.5rem); color: #f5c842; }
 
   .fullscreen-overlay .fs-timer-area {
     display: flex; align-items: center; gap: 0.75rem;
@@ -457,6 +468,7 @@
 <!-- ===== Scoreboard Panel ===== -->
 <div class="panel-overlay" id="panel-overlay"></div>
 <button class="panel-toggle" id="panel-toggle" style="display:none">&#9776;</button>
+<button class="fullscreen-btn" id="fullscreen-btn" style="display:none" title="Fullscreen">&#x26F6;</button>
 <div class="score-panel" id="score-panel"></div>
 
 <!-- ===== GAME SCREEN ===== -->
@@ -674,6 +686,7 @@ let missedWords = [];    // words answered wrong this game
 let gameActive = false;
 let endlessMode = false;
 let fullscreenMode = false;
+let wordRevealed = false;
 
 // --- LocalStorage ---
 function loadState() {
@@ -693,6 +706,7 @@ function showScreen(id) {
   const isGame = id === "game-screen";
   document.getElementById("gear-menu").style.display = isGame ? "" : "none";
   document.getElementById("panel-toggle").style.display = isGame ? "" : "none";
+  document.getElementById("fullscreen-btn").style.display = isGame ? "" : "none";
   closeGear();
   closeScorePanel();
   if (!isGame) stopTimer();
@@ -881,10 +895,11 @@ function nextWord() {
   } else {
     display.textContent = currentWord;
     fitWord(display);
-    document.getElementById("correct-btn").disabled = false;
-    document.getElementById("wrong-btn").disabled = false;
-    document.getElementById("skip-btn").disabled = false;
-    startTimer();
+    display.classList.add("blurred");
+    wordRevealed = false;
+    document.getElementById("correct-btn").disabled = true;
+    document.getElementById("wrong-btn").disabled = true;
+    document.getElementById("skip-btn").disabled = true;
   }
 
   const remainEl = document.getElementById("words-remaining");
@@ -905,6 +920,19 @@ function fitWord(el) {
     size -= 4;
     el.style.fontSize = size + "px";
   }
+}
+
+function revealWord() {
+  if (wordRevealed || !currentWord) return;
+  wordRevealed = true;
+  document.getElementById("word-display").classList.remove("blurred");
+  document.getElementById("correct-btn").disabled = false;
+  document.getElementById("wrong-btn").disabled = false;
+  document.getElementById("skip-btn").disabled = false;
+  if (fullscreenMode) {
+    document.getElementById("fs-word").classList.remove("blurred");
+  }
+  startTimer();
 }
 
 function advancePlayer() {
@@ -1124,6 +1152,12 @@ document.addEventListener("keydown", function(e) {
   // Don't trigger if typing in an input
   if (e.target.tagName === "INPUT") return;
 
+  if (!wordRevealed && e.key !== "Escape") {
+    e.preventDefault();
+    revealWord();
+    return;
+  }
+
   if (e.key === "1" || e.key === "ArrowLeft") {
     e.preventDefault();
     handleCorrect();
@@ -1167,6 +1201,7 @@ function syncFullscreen() {
     }
   }
   document.getElementById("fs-player-name").textContent = players[currentPlayerIndex].name;
+  fsWord.classList.toggle("blurred", !wordRevealed);
 }
 
 function flashFullscreenWord(type) {
@@ -1206,9 +1241,15 @@ document.getElementById("new-game-btn").addEventListener("click", function() { c
 document.getElementById("summary-new-game-btn").addEventListener("click", newGame);
 document.getElementById("summary-setup-btn").addEventListener("click", backToSetup);
 document.addEventListener("click", function(e) { if (!document.getElementById("gear-menu").contains(e.target)) closeGear(); });
-document.getElementById("word-display").addEventListener("click", enterFullscreen);
+document.getElementById("word-display").addEventListener("click", function() {
+  if (!wordRevealed) revealWord();
+});
 document.getElementById("fullscreen-overlay").addEventListener("click", function(e) {
   if (e.target === this || e.target.classList.contains("fs-hint") || e.target.classList.contains("fs-turn")) exitFullscreen();
+});
+document.getElementById("fullscreen-btn").addEventListener("click", enterFullscreen);
+document.getElementById("fs-word").addEventListener("click", function(e) {
+  if (!wordRevealed) { e.stopPropagation(); revealWord(); }
 });
 document.getElementById("fs-correct-btn").addEventListener("click", handleCorrect);
 document.getElementById("fs-wrong-btn").addEventListener("click", handleWrong);
