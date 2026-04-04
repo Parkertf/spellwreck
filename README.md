@@ -1,5 +1,7 @@
 # Spellwreck
 
+**[Play now](https://parkertf.github.io/spellwreck/)**
+
 A party-style spelling bee game where one person stands with their back to the screen while friends see the word they have to spell.
 
 ## How to Play
