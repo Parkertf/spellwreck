@@ -64,7 +64,7 @@
   .player-input input::placeholder { color: #666; }
 
   .setup-options {
-    display: flex; gap: 1rem; margin: 1rem 0; width: 100%; max-width: 400px;
+    display: flex; gap: 1.5rem; margin: 1.5rem 0; width: 100%; max-width: 400px;
     flex-wrap: wrap; justify-content: center;
   }
   .setup-options label {
@@ -340,14 +340,9 @@
   <p id="setup-empty" class="empty-state">Add at least 1 player to start</p>
 
   <div class="setup-options">
-    <label>Difficulty:
-      <select id="difficulty-select">
-        <option value="all">All</option>
-        <option value="easy">Easy</option>
-        <option value="medium">Medium</option>
-        <option value="hard">Hard</option>
-      </select>
-    </label>
+    <label style="cursor:pointer"><input type="checkbox" id="diff-easy" checked> Easy</label>
+    <label style="cursor:pointer"><input type="checkbox" id="diff-medium" checked> Medium</label>
+    <label style="cursor:pointer"><input type="checkbox" id="diff-hard" checked> Hard</label>
     <label>Timer:
       <select id="timer-select">
         <option value="0">Off</option>
@@ -355,6 +350,8 @@
         <option value="15" selected>15s</option>
         <option value="20">20s</option>
         <option value="30">30s</option>
+        <option value="60">60s</option>
+        <option value="120">120s</option>
       </select>
     </label>
     <label style="cursor:pointer">
@@ -366,9 +363,6 @@
   </div>
 
   <button class="btn btn-primary" id="start-btn" disabled>Start Game</button>
-  <div class="bottom-actions" style="margin-top:1.5rem">
-    <button class="btn btn-small btn-skip" id="clear-all-btn">Clear All</button>
-  </div>
 </div>
 
 <!-- ===== Scoreboard Panel ===== -->
@@ -562,7 +556,7 @@ let players = [];
 let currentPlayerIndex = 0;
 let seenWords = [];
 let currentWord = null;
-let difficulty = "all";
+var selectedDifficulties = ["easy", "medium", "hard"];
 let timerSeconds = 15;
 let autoTimer = true;
 let timerInterval = null;
@@ -642,8 +636,7 @@ function removePlayer(i) {
 
 // --- Word Selection ---
 function getFilteredWords() {
-  if (difficulty === "all") return WORD_BANK.map(e => e.w);
-  return WORD_BANK.filter(e => e.d === difficulty).map(e => e.w);
+  return WORD_BANK.filter(e => selectedDifficulties.indexOf(e.d) !== -1).map(e => e.w);
 }
 
 function getAvailableWords() {
@@ -736,7 +729,10 @@ function stopTimer() {
 
 // --- Game ---
 function startGame() {
-  difficulty = document.getElementById("difficulty-select").value;
+  selectedDifficulties = [];
+  if (document.getElementById("diff-easy").checked) selectedDifficulties.push("easy");
+  if (document.getElementById("diff-medium").checked) selectedDifficulties.push("medium");
+  if (document.getElementById("diff-hard").checked) selectedDifficulties.push("hard");
   timerSeconds = parseInt(document.getElementById("timer-select").value);
   autoTimer = document.getElementById("auto-timer-check").checked;
   endlessMode = document.getElementById("endless-check").checked;
@@ -1035,7 +1031,6 @@ document.getElementById("panel-toggle").addEventListener("click", toggleScorePan
 document.getElementById("panel-overlay").addEventListener("click", closeScorePanel);
 document.getElementById("end-game-btn").addEventListener("click", function() { closeGear(); endGame(); });
 document.getElementById("new-game-btn").addEventListener("click", function() { closeGear(); newGame(); });
-document.getElementById("clear-all-btn").addEventListener("click", function() { if (confirm("Clear all players and data?")) clearAll(); });
 document.getElementById("summary-new-game-btn").addEventListener("click", newGame);
 document.getElementById("summary-setup-btn").addEventListener("click", backToSetup);
 document.addEventListener("click", function(e) { if (!document.getElementById("gear-menu").contains(e.target)) closeGear(); });
