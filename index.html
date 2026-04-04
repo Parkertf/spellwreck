@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Spellwreck</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,9 +12,12 @@
     background: #1a1a2e;
     color: #eee;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    -webkit-text-size-adjust: 100%;
   }
 
   h1 {
@@ -32,6 +35,7 @@
 
   #game-screen.active {
     height: 100vh;
+    height: 100dvh;
     max-width: 100%;
     padding: 0 1rem;
     justify-content: space-between;
@@ -97,13 +101,16 @@
   }
   .player-list li button {
     background: none; border: none; color: #e74c3c; cursor: pointer;
-    font-size: 1.2rem; padding: 0 0.25rem;
+    font-size: 1.4rem; padding: 0.5rem 0.75rem; min-width: 44px; min-height: 44px;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
 
   /* --- Buttons --- */
   .btn {
     padding: 0.75rem 2rem; border: none; border-radius: 10px; font-size: 1.1rem;
     cursor: pointer; font-weight: 600; transition: transform 0.1s, opacity 0.15s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
+    min-height: 44px;
   }
   .btn:active { transform: scale(0.9); }
   .btn-correct.clicked { background: #fff; color: #2ecc71; transform: scale(1.05); }
@@ -136,8 +143,10 @@
 
   .timer-start-icon {
     background: none; border: none; font-size: 2.5rem;
-    cursor: pointer; line-height: 1; padding: 0;
+    cursor: pointer; line-height: 1; padding: 0.25rem;
+    min-width: 44px; min-height: 44px;
     transition: transform 0.15s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .timer-start-icon:hover { transform: scale(1.15); }
 
@@ -168,6 +177,7 @@
     overflow: visible;
     transition: transform 0.15s, color 0.15s;
     cursor: pointer;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
 
   .word-display.flash-correct {
@@ -236,12 +246,14 @@
 
   /* --- Gear Menu --- */
   .gear-menu {
-    position: fixed; top: 1rem; right: 1rem; z-index: 100;
+    position: fixed; top: calc(1rem + env(safe-area-inset-top)); right: calc(1rem + env(safe-area-inset-right)); z-index: 100;
   }
   .gear-btn {
     background: none; border: none; color: #888; font-size: 2.5rem;
-    cursor: pointer; padding: 0.4rem; line-height: 1;
+    cursor: pointer; padding: 0.5rem; line-height: 1;
+    min-width: 44px; min-height: 44px;
     transition: color 0.15s, transform 0.2s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .gear-btn:hover, .gear-btn.open { color: #f5c842; transform: rotate(45deg); }
   .gear-dropdown {
@@ -258,10 +270,12 @@
 
   /* --- Scoreboard Panel --- */
   .panel-toggle {
-    position: fixed; top: 1rem; left: 1rem; z-index: 100;
+    position: fixed; top: calc(1rem + env(safe-area-inset-top)); left: calc(1rem + env(safe-area-inset-left)); z-index: 100;
     background: none; border: none; color: #888; font-size: 2.5rem;
-    cursor: pointer; padding: 0.4rem; line-height: 1;
+    cursor: pointer; padding: 0.5rem; line-height: 1;
+    min-width: 44px; min-height: 44px;
     transition: color 0.15s;
+    touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
   .panel-toggle:hover, .panel-toggle.open { color: #f5c842; }
 
@@ -271,7 +285,7 @@
     box-shadow: 4px 0 20px rgba(0,0,0,0.5);
     transform: translateX(-100%);
     transition: transform 0.25s ease;
-    z-index: 99; padding: 4.5rem 1.5rem 1.5rem;
+    z-index: 99; padding: calc(4.5rem + env(safe-area-inset-top)) 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
   .score-panel.open { transform: translateX(0); }
@@ -336,8 +350,13 @@
   }
   .fullscreen-overlay .fs-timer-bar.urgent { background: #e74c3c; }
 
+  .fullscreen-overlay .fs-controls {
+    display: flex; gap: 1rem; width: 90%; max-width: 500px; margin-top: 2rem;
+  }
+  .fullscreen-overlay .fs-controls .btn { font-size: 1.3rem; padding: 1rem; }
+
   .fullscreen-overlay .fs-hint {
-    position: fixed; bottom: 1.5rem;
+    position: fixed; bottom: calc(1.5rem + env(safe-area-inset-bottom));
     font-size: 0.8rem; color: #444;
   }
 
@@ -483,6 +502,23 @@
   </div>
 </div>
 
+<!-- ===== Fullscreen Overlay ===== -->
+<div class="fullscreen-overlay" id="fullscreen-overlay">
+  <p class="fs-turn"><strong id="fs-player-name"></strong>'s turn</p>
+  <div class="fs-word" id="fs-word"></div>
+  <div class="fs-timer-area">
+    <div class="fs-timer-bar-container">
+      <div class="fs-timer-bar" id="fs-timer-bar"></div>
+    </div>
+  </div>
+  <div class="fs-controls">
+    <button class="btn btn-correct" id="fs-correct-btn">Correct</button>
+    <button class="btn btn-wrong" id="fs-wrong-btn">Wrong</button>
+    <button class="btn btn-skip" id="fs-skip-btn">Skip</button>
+  </div>
+  <p class="fs-hint">Tap outside to exit &bull; Space pause/play</p>
+</div>
+
 <script>
 // --- Word Bank with Difficulty ---
 const WORD_BANK = [
@@ -568,6 +604,7 @@ let audioCtx = null;
 
 function ensureAudio() {
   if (!audioCtx) audioCtx = new AudioCtx();
+  if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
 function playCorrectSound() {
@@ -1171,8 +1208,19 @@ document.getElementById("summary-setup-btn").addEventListener("click", backToSet
 document.addEventListener("click", function(e) { if (!document.getElementById("gear-menu").contains(e.target)) closeGear(); });
 document.getElementById("word-display").addEventListener("click", enterFullscreen);
 document.getElementById("fullscreen-overlay").addEventListener("click", function(e) {
-  // Only exit if clicking the background, not the word itself
-  if (e.target === this || e.target.classList.contains("fs-hint")) exitFullscreen();
+  if (e.target === this || e.target.classList.contains("fs-hint") || e.target.classList.contains("fs-turn")) exitFullscreen();
+});
+document.getElementById("fs-correct-btn").addEventListener("click", handleCorrect);
+document.getElementById("fs-wrong-btn").addEventListener("click", handleWrong);
+document.getElementById("fs-skip-btn").addEventListener("click", handleSkip);
+
+// Refit word on orientation change / resize
+window.addEventListener("resize", function() {
+  if (!gameActive || !currentWord) return;
+  var display = document.getElementById("word-display");
+  display.style.fontSize = "";
+  fitWord(display);
+  if (fullscreenMode) syncFullscreen();
 });
 
 // --- Init ---
@@ -1180,17 +1228,6 @@ loadState();
 renderPlayerList();
 </script>
 
-<!-- ===== Fullscreen Overlay ===== -->
-<div class="fullscreen-overlay" id="fullscreen-overlay">
-  <p class="fs-turn"><strong id="fs-player-name"></strong>'s turn</p>
-  <div class="fs-word" id="fs-word"></div>
-  <div class="fs-timer-area">
-    <div class="fs-timer-bar-container">
-      <div class="fs-timer-bar" id="fs-timer-bar"></div>
-    </div>
-  </div>
-  <p class="fs-hint">Click to exit &bull; Keyboard: 1/&larr; Correct &bull; 2/&darr; Wrong &bull; 3/&rarr; Skip &bull; Space pause</p>
-</div>
 
 </body>
 </html>
