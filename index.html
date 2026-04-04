@@ -453,6 +453,8 @@
         <label><input type="checkbox" id="set-friends"> Friends</label>
         <label><input type="checkbox" id="set-reba"> Reba</label>
         <label><input type="checkbox" id="set-pokemon"> Pok&eacute;mon</label>
+        <label><input type="checkbox" id="set-gilmore"> Gilmore Girls</label>
+        <label><input type="checkbox" id="set-matrix"> The Matrix</label>
       </div>
     </div>
     <div class="option-group">
@@ -722,7 +724,35 @@ const WORD_BANK = [
   {w:"Gyarados",d:"pokemon"},{w:"Lapras",d:"pokemon"},{w:"Eevee",d:"pokemon"},
   {w:"Vaporeon",d:"pokemon"},{w:"Snorlax",d:"pokemon"},{w:"Articuno",d:"pokemon"},
   {w:"Zapdos",d:"pokemon"},{w:"Moltres",d:"pokemon"},{w:"Dragonite",d:"pokemon"},
-  {w:"Mewtwo",d:"pokemon"},{w:"Mew",d:"pokemon"}
+  {w:"Mewtwo",d:"pokemon"},{w:"Mew",d:"pokemon"},
+  // Gilmore Girls
+  {w:"Lorelai",d:"gilmore"},{w:"Rory",d:"gilmore"},{w:"Gilmore",d:"gilmore"},
+  {w:"Dragonfly",d:"gilmore"},{w:"Independence",d:"gilmore"},{w:"Hartford",d:"gilmore"},
+  {w:"Connecticut",d:"gilmore"},{w:"Chilton",d:"gilmore"},{w:"Yale",d:"gilmore"},
+  {w:"Sookie",d:"gilmore"},{w:"Babette",d:"gilmore"},{w:"Jess",d:"gilmore"},
+  {w:"Mariano",d:"gilmore"},{w:"DuGrey",d:"gilmore"},{w:"Huntzberger",d:"gilmore"},
+  {w:"Belleville",d:"gilmore"},{w:"troubadour",d:"gilmore"},{w:"Doose",d:"gilmore"},
+  {w:"Emily",d:"gilmore"},{w:"Richard",d:"gilmore"},{w:"Christopher",d:"gilmore"},
+  {w:"Hayden",d:"gilmore"},{w:"Straub",d:"gilmore"},{w:"Patty",d:"gilmore"},
+  {w:"Gypsy",d:"gilmore"},{w:"Michel",d:"gilmore"},{w:"Gerard",d:"gilmore"},
+  {w:"valedictorian",d:"gilmore"},{w:"journalism",d:"gilmore"},{w:"catalogue",d:"gilmore"},
+  {w:"Renaissance",d:"gilmore"},{w:"debutante",d:"gilmore"},{w:"cotillion",d:"gilmore"},
+  {w:"philanthropist",d:"gilmore"},{w:"scholarship",d:"gilmore"},{w:"Thanksgiving",d:"gilmore"},
+  {w:"espresso",d:"gilmore"},{w:"cappuccino",d:"gilmore"},{w:"flannel",d:"gilmore"},
+  {w:"Shakespeare",d:"gilmore"},{w:"Dostoyevsky",d:"gilmore"},{w:"Hemingway",d:"gilmore"},
+  // The Matrix
+  {w:"Morpheus",d:"matrix"},{w:"Trinity",d:"matrix"},{w:"Nebuchadnezzar",d:"matrix"},
+  {w:"Zion",d:"matrix"},{w:"Merovingian",d:"matrix"},{w:"Niobe",d:"matrix"},
+  {w:"Persephone",d:"matrix"},{w:"Seraph",d:"matrix"},{w:"Cypher",d:"matrix"},
+  {w:"Apoc",d:"matrix"},{w:"Sentinels",d:"matrix"},{w:"Architect",d:"matrix"},
+  {w:"Oracle",d:"matrix"},{w:"Keymaker",d:"matrix"},{w:"anomaly",d:"matrix"},
+  {w:"simulacrum",d:"matrix"},{w:"dystopian",d:"matrix"},{w:"apocalypse",d:"matrix"},
+  {w:"prophecy",d:"matrix"},{w:"resurrection",d:"matrix"},{w:"consciousness",d:"matrix"},
+  {w:"philosophy",d:"matrix"},{w:"existential",d:"matrix"},{w:"simulation",d:"matrix"},
+  {w:"artificial",d:"matrix"},{w:"intelligence",d:"matrix"},{w:"surveillance",d:"matrix"},
+  {w:"guerrilla",d:"matrix"},{w:"deja vu",d:"matrix"},{w:"ammunition",d:"matrix"},
+  {w:"helicopter",d:"matrix"},{w:"martial",d:"matrix"},{w:"kung fu",d:"matrix"},
+  {w:"protagonist",d:"matrix"},{w:"catharsis",d:"matrix"},{w:"labyrinth",d:"matrix"}
 ];
 
 // --- Sound Effects (Web Audio API) ---
@@ -1011,6 +1041,8 @@ function startGame() {
   if (document.getElementById("set-friends").checked) selectedDifficulties.push("friends");
   if (document.getElementById("set-reba").checked) selectedDifficulties.push("reba");
   if (document.getElementById("set-pokemon").checked) selectedDifficulties.push("pokemon");
+  if (document.getElementById("set-gilmore").checked) selectedDifficulties.push("gilmore");
+  if (document.getElementById("set-matrix").checked) selectedDifficulties.push("matrix");
   timerSeconds = parseInt(document.getElementById("timer-select").value);
   autoTimer = document.getElementById("auto-timer-check").checked;
   endlessMode = document.getElementById("endless-check").checked;
