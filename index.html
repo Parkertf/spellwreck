@@ -39,6 +39,7 @@
     max-width: 100%;
     padding: 0 1rem;
     justify-content: space-between;
+    overflow: hidden;
   }
 
   #summary-screen.active {
@@ -175,10 +176,10 @@
     width: 100%;
     max-width: 95vw;
     overflow: visible;
-    transition: transform 0.15s, color 0.15s, filter 0.3s;
+    transition: transform 0.15s, color 0.3s, filter 0.4s, opacity 0.3s;
     touch-action: manipulation; -webkit-tap-highlight-color: transparent;
   }
-  .word-display.blurred { filter: blur(2.5rem); color: #f5c842; cursor: pointer; }
+  .word-display.blurred { cursor: pointer; letter-spacing: 0.15em; color: #fff; filter: none; }
 
   .word-display.flash-correct {
     animation: flashCorrect 0.4s ease-out;
@@ -338,13 +339,13 @@
     letter-spacing: 0.08em; text-align: center;
     white-space: nowrap; max-width: 95vw;
     padding: 1rem;
-    transition: transform 0.15s, color 0.15s;
+    transition: transform 0.15s, color 0.3s, filter 0.4s, opacity 0.25s;
   }
 
   .fullscreen-overlay .fs-word.flash-correct { animation: flashCorrect 0.4s ease-out; }
   .fullscreen-overlay .fs-word.flash-wrong { animation: flashWrong 0.4s ease-out; }
   .fullscreen-overlay .fs-word.flash-skip { animation: flashSkip 0.35s ease-out; }
-  .fullscreen-overlay .fs-word.blurred { filter: blur(2.5rem); color: #f5c842; }
+  .fullscreen-overlay .fs-word.blurred { cursor: pointer; letter-spacing: 0.15em; color: #fff; filter: none; }
 
   .fullscreen-overlay .fs-timer-area {
     display: flex; align-items: center; gap: 0.75rem;
@@ -458,6 +459,7 @@
       <div class="option-group-title">Mode</div>
       <div class="option-group-row">
         <label><input type="checkbox" id="endless-check"> Endless</label>
+        <label><input type="checkbox" id="sound-check" checked> Sound</label>
       </div>
     </div>
   </div>
@@ -615,12 +617,30 @@ const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
 function ensureAudio() {
+  if (!soundEnabled) return false;
   if (!audioCtx) audioCtx = new AudioCtx();
   if (audioCtx.state === "suspended") audioCtx.resume();
+  return true;
 }
 
-function playCorrectSound() {
+// iOS Safari requires AudioContext to be created/resumed on a user gesture.
+// Unlock audio on the very first tap so sounds work later.
+function unlockAudio() {
   ensureAudio();
+  // Play a silent buffer to fully unlock on iOS
+  var buf = audioCtx.createBuffer(1, 1, 22050);
+  var src = audioCtx.createBufferSource();
+  src.buffer = buf;
+  src.connect(audioCtx.destination);
+  src.start(0);
+  document.removeEventListener("touchstart", unlockAudio);
+  document.removeEventListener("click", unlockAudio);
+}
+document.addEventListener("touchstart", unlockAudio, { once: true });
+document.addEventListener("click", unlockAudio, { once: true });
+
+function playCorrectSound() {
+  if (!ensureAudio()) return;
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.connect(g); g.connect(audioCtx.destination);
@@ -633,7 +653,7 @@ function playCorrectSound() {
 }
 
 function playWrongSound() {
-  ensureAudio();
+  if (!ensureAudio()) return;
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.connect(g); g.connect(audioCtx.destination);
@@ -645,7 +665,7 @@ function playWrongSound() {
 }
 
 function playSkipSound() {
-  ensureAudio();
+  if (!ensureAudio()) return;
   const o = audioCtx.createOscillator();
   const g = audioCtx.createGain();
   o.connect(g); g.connect(audioCtx.destination);
@@ -657,7 +677,7 @@ function playSkipSound() {
 }
 
 function playTimerExpiredSound() {
-  ensureAudio();
+  if (!ensureAudio()) return;
   for (let i = 0; i < 3; i++) {
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
@@ -685,8 +705,10 @@ let bestStreaks = {};    // playerName -> best streak
 let missedWords = [];    // words answered wrong this game
 let gameActive = false;
 let endlessMode = false;
+let soundEnabled = true;
 let fullscreenMode = false;
 let wordRevealed = false;
+let actionLocked = false;
 
 // --- LocalStorage ---
 function loadState() {
@@ -703,7 +725,8 @@ function saveSeen() { localStorage.setItem("sw_seen", JSON.stringify(seenWords))
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
   document.getElementById(id).classList.add("active");
-  const isGame = id === "game-screen";
+  var isGame = id === "game-screen";
+  document.querySelector("h1").style.display = isGame ? "none" : "";
   document.getElementById("gear-menu").style.display = isGame ? "" : "none";
   document.getElementById("panel-toggle").style.display = isGame ? "" : "none";
   document.getElementById("fullscreen-btn").style.display = isGame ? "" : "none";
@@ -864,6 +887,7 @@ function startGame() {
   timerSeconds = parseInt(document.getElementById("timer-select").value);
   autoTimer = document.getElementById("auto-timer-check").checked;
   endlessMode = document.getElementById("endless-check").checked;
+  soundEnabled = document.getElementById("sound-check").checked;
   currentPlayerIndex = 0;
   gameActive = true;
   missedWords = [];
@@ -880,6 +904,7 @@ function startGame() {
 }
 
 function nextWord() {
+  actionLocked = false;
   currentWord = pickWord();
   const display = document.getElementById("word-display");
   const remaining = getAvailableWords().length;
@@ -893,7 +918,7 @@ function nextWord() {
     stopTimer();
     document.getElementById("timer-container").classList.add("hidden");
   } else {
-    display.textContent = currentWord;
+    display.textContent = "_".repeat(currentWord.length);
     fitWord(display);
     display.classList.add("blurred");
     wordRevealed = false;
@@ -925,13 +950,34 @@ function fitWord(el) {
 function revealWord() {
   if (wordRevealed || !currentWord) return;
   wordRevealed = true;
-  document.getElementById("word-display").classList.remove("blurred");
+  var display = document.getElementById("word-display");
+  var fsWord = fullscreenMode ? document.getElementById("fs-word") : null;
+
+  // Fade out
+  display.style.opacity = "0";
+  if (fsWord) fsWord.style.opacity = "0";
+
+  setTimeout(function() {
+    // Swap text while invisible
+    display.textContent = currentWord;
+    display.style.fontSize = "";
+    fitWord(display);
+    display.classList.remove("blurred");
+    if (fsWord) {
+      fsWord.textContent = currentWord;
+      fsWord.classList.remove("blurred");
+      syncFullscreen();
+    }
+    // Fade in
+    requestAnimationFrame(function() {
+      display.style.opacity = "";
+      if (fsWord) fsWord.style.opacity = "";
+    });
+  }, 250);
+
   document.getElementById("correct-btn").disabled = false;
   document.getElementById("wrong-btn").disabled = false;
   document.getElementById("skip-btn").disabled = false;
-  if (fullscreenMode) {
-    document.getElementById("fs-word").classList.remove("blurred");
-  }
   startTimer();
 }
 
@@ -964,7 +1010,8 @@ function flashButton(btn) {
 }
 
 function handleCorrect() {
-  if (!currentWord || !gameActive) return;
+  if (!currentWord || !gameActive || actionLocked) return;
+  actionLocked = true;
   stopTimer();
   flashWord("correct");
   flashButton(document.getElementById("correct-btn"));
@@ -983,7 +1030,8 @@ function handleCorrect() {
 }
 
 function handleWrong() {
-  if (!currentWord || !gameActive) return;
+  if (!currentWord || !gameActive || actionLocked) return;
+  actionLocked = true;
   stopTimer();
   flashWord("wrong");
   flashButton(document.getElementById("wrong-btn"));
@@ -1007,7 +1055,8 @@ function handleWrong() {
 }
 
 function handleSkip() {
-  if (!currentWord || !gameActive) return;
+  if (!currentWord || !gameActive || actionLocked) return;
+  actionLocked = true;
   stopTimer();
   flashWord("skip");
   flashButton(document.getElementById("skip-btn"));
@@ -1190,7 +1239,7 @@ function exitFullscreen() {
 function syncFullscreen() {
   if (!fullscreenMode) return;
   var fsWord = document.getElementById("fs-word");
-  fsWord.textContent = currentWord || "No words left!";
+  fsWord.textContent = !currentWord ? "No words left!" : (wordRevealed ? currentWord : "_".repeat(currentWord.length));
   fsWord.style.fontSize = "";
   if (currentWord) {
     var maxWidth = window.innerWidth * 0.95;
